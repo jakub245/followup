@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Help App — Interaktivní prototyp</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
 :root {
   --bg: #0c0c0e;
@@ -129,7 +130,7 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
   border: 1px solid transparent;
 }
 .nav-item:hover { color: var(--text2); background: var(--bg3); }
-.nav-item.active { color: var(--text); background: var(--bg3); border-color: var(--border); }
+.nav-item.active { color: var(--text); background: var(--bg3); border-color: var(--border); } .nav-item.active i { stroke: var(--accent) !important; } .nav-item i { vertical-align: middle; }
 .nav-item .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
 .nav-item.active .nav-dot { background: var(--accent); }
 
@@ -199,15 +200,16 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
   transition: all .15s;
 }
 .pnav-icon {
-  width: 22px; height: 22px;
-  border-radius: 6px;
+  width: 26px; height: 26px;
+  border-radius: 7px;
   background: var(--bg3);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
   transition: all .15s;
 }
+.pnav-icon svg { width: 14px; height: 14px; stroke: var(--text3); stroke-width: 2; transition: stroke .15s; }
 .pnav-label { font-size: 9px; color: var(--text3); transition: color .15s; }
 .pnav-item.active .pnav-icon { background: var(--accent); }
+.pnav-item.active .pnav-icon svg { stroke: white; }
 .pnav-item.active .pnav-label { color: var(--accent); }
 
 /* ── RIGHT PANEL — annotations ── */
@@ -784,11 +786,11 @@ const screens = {
   lukas: {
     dashboard: {
       title: 'Přehled', nav: 'dashboard',
-      annotation: { title: 'CEO Dashboard', body: 'Lukáš vidí agregaci všech provozoven. Žádná operativa — jen čísla a co vyžaduje jeho rozhodnutí.', items: ['3 provozovny na jednom místě','Červený indikátor = vyžaduje pozornost','FYI od Jakuba v samostatné sekci'] },
+      annotation: { title: 'CEO Dashboard', body: 'Lukáš vidí agregaci všech provozoven. Žádná operativa — jen čísla a co vyžaduje jeho rozhodnutí.', items: ['4 provozovny na jednom místě','Červený indikátor = vyžaduje pozornost','FYI od Jakuba v samostatné sekci'] },
       render: () => `
         <div class="s-header"><div><div class="s-title">Dobrý ráno, Lukáš</div><div class="s-sub">Přehled provozoven · ${new Date().toLocaleDateString('cs-CZ')}</div></div></div>
         <div class="stat-row">
-          <div class="stat-box ok"><div class="stat-num">3</div><div class="stat-lbl">Provozovny</div></div>
+          <div class="stat-box ok"><div class="stat-num">4</div><div class="stat-lbl">Provozovny</div></div>
           <div class="stat-box danger"><div class="stat-num">2</div><div class="stat-lbl">Vyžaduje pozornost</div></div>
         </div>
         <div class="stat-row">
@@ -800,13 +802,17 @@ const screens = {
           <div class="lc-row"><div class="lc-name">Bistro Green</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--green)">OK</span><div class="lc-dot lc-ok"></div></div></div>
           <div class="lc-meta">3 na směně · 2 otevřené úkoly</div>
         </div>
-        <div class="location-card" onclick="showToast('Kavárna Anděl — detail','warn')">
-          <div class="lc-row"><div class="lc-name">Kavárna Anděl</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--yellow)">!</span><div class="lc-dot lc-warn"></div></div></div>
+        <div class="location-card" onclick="showToast('Labonetta Kobylisy — detail','warn')">
+          <div class="lc-row"><div class="lc-name">Labonetta Kobylisy</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--yellow)">!</span><div class="lc-dot lc-warn"></div></div></div>
           <div class="lc-meta">2 na směně · 1 úkol po termínu</div>
         </div>
-        <div class="location-card" onclick="showToast('Bistro Náměstí — vše OK')">
-          <div class="lc-row"><div class="lc-name">Bistro Náměstí</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--green)">OK</span><div class="lc-dot lc-ok"></div></div></div>
+        <div class="location-card" onclick="showToast('Labonetta Mecholupy — vše OK')">
+          <div class="lc-row"><div class="lc-name">Labonetta Mecholupy</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--green)">OK</span><div class="lc-dot lc-ok"></div></div></div>
           <div class="lc-meta">4 na směně · vše v pořádku</div>
+        </div>
+        <div class="location-card" onclick="showToast('Labonetta Prosek — vše OK')">
+          <div class="lc-row"><div class="lc-name">Labonetta Prosek</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--green)">OK</span><div class="lc-dot lc-ok"></div></div></div>
+          <div class="lc-meta">3 na směně · vše v pořádku</div>
         </div>
         <div class="section-label">Marketing — od Jakuba</div>
         <div class="fronta-item" onclick="goScreen('lukas','ukoly')">
@@ -852,7 +858,7 @@ const screens = {
           <div class="t-body"><div class="t-title">Příprava letního menu — review</div><div class="t-meta"><span>→ Zdeněk</span><span>do 25. 5.</span></div></div>
           <span class="badge b-seen">Přijato</span>
         </div>
-        <div class="task-item" onclick="showToast('Detail úkolu — Kavárna Anděl')">
+        <div class="task-item" onclick="showToast('Detail úkolu — Labonetta Kobylisy')">
           <div class="t-check"></div>
           <div class="t-body"><div class="t-title">Zkontrolovat inventory Anděl</div><div class="t-meta"><span>→ Martin</span><span>po termínu</span></div></div>
           <span class="badge b-pend">Po termínu</span>
@@ -872,9 +878,7 @@ const screens = {
       render: () => `
         <div class="s-header"><div class="back-btn" onclick="goScreen('lukas','ukoly')">← Úkoly</div><div class="s-title">Nový úkol</div></div>
         <div class="voice-area" id="voice-ceo" onclick="toggleRecording('voice-ceo','ai-ceo')">
-          <div class="mic-btn">🎙</div>
-          <div class="mic-label">Podržte a mluvte nebo klikněte</div>
-        </div>
+          <div class="mic-btn"><i data-lucide="mic" style="width:20px;height:20px;stroke:white;stroke-width:2;"></i></div><div class="mic-label">Klikni a mluv</div></div>
         <div class="px" style="margin-bottom:8px;">
           <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Nebo napište</div>
           <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;color:var(--text3);">Zdeňku, zkontroluj zásoby před víkendem...</div>
@@ -905,9 +909,9 @@ const screens = {
           <div class="p-info"><div class="p-name">Zdeněk Novák</div><div class="p-status">Manager · Bistro Green</div></div>
           <span style="font-size:10px;color:var(--text3)">14:22</span>
         </div>
-        <div class="person-row" onclick="showToast('Chat — Martin, Kavárna Anděl')">
+        <div class="person-row" onclick="showToast('Chat — Martin, Labonetta Kobylisy')">
           <div class="p-av p-off">M</div>
-          <div class="p-info"><div class="p-name">Martin Kovář</div><div class="p-status">Manager · Kavárna Anděl</div></div>
+          <div class="p-info"><div class="p-name">Martin Kovář</div><div class="p-status">Manager · Labonetta Kobylisy</div></div>
           <span style="font-size:10px;color:var(--text3)">včera</span>
         </div>
       `
@@ -1001,8 +1005,7 @@ const screens = {
       render: () => `
         <div class="s-header"><div class="back-btn" onclick="goScreen('zdenek','ukoly')">← Úkoly</div><div class="s-title">Nový úkol</div></div>
         <div class="voice-area" id="voice-z" onclick="toggleRecording('voice-z','ai-z')">
-          <div class="mic-btn">🎙</div>
-          <div class="mic-label">Klikni a mluv — AI zpracuje</div>
+          <div class="mic-btn"><i data-lucide="mic" style="width:20px;height:20px;stroke:white;stroke-width:2;"></i></div><div class="mic-label">Klikni a mluv</div> <div class="mic-label">Klikni a mluv — AI zpracuje</div>
         </div>
         <div class="px" style="margin-bottom:8px;">
           <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Přepis</div>
@@ -1170,8 +1173,7 @@ const screens = {
       render: () => `
         <div class="s-header"><div class="back-btn" onclick="goScreen('jakub','ukoly')">← Úkoly</div><div class="s-title">Nový úkol</div></div>
         <div class="voice-area" id="voice-j" onclick="toggleRecording('voice-j','ai-j')">
-          <div class="mic-btn">🎙</div>
-          <div class="mic-label">Klikni a mluv</div>
+          <div class="mic-btn"><i data-lucide="mic" style="width:20px;height:20px;stroke:white;stroke-width:2;"></i></div><div class="mic-label">Klikni a mluv</div> <div class="mic-label">Klikni a mluv</div>
         </div>
         <div class="section-label">Přiřadit komu</div>
         <div style="padding:0 20px 12px;display:flex;gap:6px;flex-wrap:wrap;">
@@ -1216,8 +1218,7 @@ const screens = {
         <div class="detail-section"><div class="detail-label">Poslední update</div><div class="detail-value" style="color:var(--text2);">"Poslal jsem to do tisku, snad to bude příští týden." <span style="color:var(--text3);font-size:11px;">· dnes 14:33</span></div></div>
         <div class="section-label">Přidat update</div>
         <div class="voice-area" id="voice-j2" onclick="toggleRecording('voice-j2','ai-j2')">
-          <div class="mic-btn">🎙</div>
-          <div class="mic-label">Nahrát hlasový update</div>
+          <div class="mic-btn"><i data-lucide="mic" style="width:20px;height:20px;stroke:white;stroke-width:2;"></i></div><div class="mic-label">Klikni a mluv</div> <div class="mic-label">Nahrát hlasový update</div>
         </div>
         <div id="ai-j2" style="display:none;">
           <div class="ai-box">
@@ -1348,8 +1349,7 @@ const screens = {
         </div>
         <div class="section-label">Přidat update</div>
         <div class="voice-area" id="voice-n" onclick="toggleRecording('voice-n','ai-n')">
-          <div class="mic-btn">🎙</div>
-          <div class="mic-label">Nahrát hlasový update</div>
+          <div class="mic-btn"><i data-lucide="mic" style="width:20px;height:20px;stroke:white;stroke-width:2;"></i></div><div class="mic-label">Klikni a mluv</div> <div class="mic-label">Nahrát hlasový update</div>
         </div>
         <div id="ai-n" style="display:none;">
           <div class="ai-box">
@@ -1488,7 +1488,7 @@ function renderAll() {
   const navTree = document.getElementById('nav-tree');
   navTree.innerHTML = Object.entries(roleScreens).map(([id, s]) => `
     <div class="nav-item ${id === currentScreen ? 'active' : ''}" onclick="goScreen('${currentRole}','${id}')">
-      <div class="nav-dot"></div>${s.title}
+      <i data-lucide="chevron-right" style="width:10px;height:10px;stroke:var(--text3);stroke-width:2;flex-shrink:0;"></i>${s.title}
     </div>
   `).join('');
 
@@ -1502,7 +1502,17 @@ function renderAll() {
       (item.id === 'fyi' && currentScreen.includes('fyi')) ||
       (item.id === 'zpravy' && currentScreen.includes('chat')) ||
       (item.id === 'dashboard' && currentScreen === 'provozovna');
-    const icons = { dashboard:'⬜', ukoly:'✅', tym:'👥', chat:'💬', nastaveni:'⚙️', fyi:'📤', zpravy:'✉️', profil:'👤', přehled:'⬜' };
+    const icons = {
+      dashboard: '<i data-lucide="layout-dashboard"></i>',
+      ukoly: '<i data-lucide="check-square"></i>',
+      tym: '<i data-lucide="users"></i>',
+      chat: '<i data-lucide="message-circle"></i>',
+      nastaveni: '<i data-lucide="settings"></i>',
+      fyi: '<i data-lucide="send"></i>',
+      zpravy: '<i data-lucide="mail"></i>',
+      profil: '<i data-lucide="user"></i>',
+      přehled: '<i data-lucide="layout-dashboard"></i>'
+    };
     return `<div class="pnav-item ${isActive?'active':''}" onclick="goScreen('${currentRole}','${item.id}')">
       <div class="pnav-icon">${icons[item.id]||'◻️'}</div>
       <div class="pnav-label">${item.label}</div>
@@ -1537,6 +1547,8 @@ function renderAll() {
       </ul>
     </div>
   `;
+  // Re-render Lucide icons after DOM update
+  if (window.lucide) lucide.createIcons();
 }
 
 // Init
