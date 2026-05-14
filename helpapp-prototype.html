@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help App — Interaktivní prototyp</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c0e;
+  --bg2: #141416;
+  --bg3: #1c1c20;
+  --bg4: #242428;
+  --border: #2a2a30;
+  --border2: #38383f;
+  --text: #f0f0f0;
+  --text2: #b0b0b8;
+  --text3: #787880;
+  --accent: #ff6b2b;
+  --accent2: #ff9a5c;
+  --green: #4ade80;
+  --green-bg: rgba(74,222,128,.1);
+  --green-border: rgba(74,222,128,.25);
+  --yellow: #fbbf24;
+  --yellow-bg: rgba(251,191,36,.1);
+  --yellow-border: rgba(251,191,36,.25);
+  --red: #f87171;
+  --red-bg: rgba(248,113,113,.1);
+  --red-border: rgba(248,113,113,.25);
+  --blue: #60a5fa;
+  --blue-bg: rgba(96,165,250,.1);
+  --blue-border: rgba(96,165,250,.25);
+  --purple: #a78bfa;
+  --purple-bg: rgba(167,139,250,.1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; overflow:hidden; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; display:flex; align-items:center; justify-content:center; }
+
+/* ── OUTER SHELL ── */
+.shell {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  padding: 24px;
+  height: 100vh;
+  width: 100%;
+  max-width: 1200px;
+  overflow: hidden;
+}
+
+/* ── LEFT PANEL — role switcher + breadcrumb ── */
+.left-panel {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 12px;
+}
+
+.app-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -.03em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.app-logo span { color: var(--accent); }
+
+.panel-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 8px;
+}
+
+.role-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .2s;
+  background: transparent;
+}
+.role-btn:hover { background: var(--bg3); }
+.role-btn.active { background: var(--bg3); border-color: var(--border2); }
+
+.role-av {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500;
+  flex-shrink: 0;
+}
+.av-ceo { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.av-mgr { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.av-mkt { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+.av-emp { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(167,139,250,.3); }
+
+.role-info { flex: 1; }
+.role-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.role-tag { font-size: 11px; color: var(--text3); }
+
+.nav-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.nav-item {
+  font-size: 12px;
+  color: var(--text3);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all .15s;
+  border: 1px solid transparent;
+}
+.nav-item:hover { color: var(--text2); background: var(--bg3); }
+.nav-item.active { color: var(--text); background: var(--bg3); border-color: var(--border); }
+.nav-item .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+.nav-item.active .nav-dot { background: var(--accent); }
+
+/* ── PHONE FRAME ── */
+.phone-frame {
+  width: 375px;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 48px);
+  max-height: 780px;
+  box-shadow: 0 0 0 8px var(--bg), 0 40px 80px rgba(0,0,0,.6);
+  position: relative;
+}
+
+.phone-notch {
+  height: 12px;
+  background: var(--bg2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-top: 8px;
+}
+.notch-bar { width: 80px; height: 4px; background: var(--bg4); border-radius: 99px; }
+
+.phone-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 20px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+
+.phone-screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+.phone-screen::-webkit-scrollbar { display: none; }
+
+.phone-nav-bar {
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+  padding: 8px 0 12px;
+}
+
+.pnav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: all .15s;
+}
+.pnav-icon {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  transition: all .15s;
+}
+.pnav-label { font-size: 9px; color: var(--text3); transition: color .15s; }
+.pnav-item.active .pnav-icon { background: var(--accent); }
+.pnav-item.active .pnav-label { color: var(--accent); }
+
+/* ── RIGHT PANEL — annotations ── */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 48px);
+}
+.right-panel::-webkit-scrollbar { display: none; }
+
+.annotation-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.ann-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.ann-body {
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.6;
+}
+.ann-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
+}
+.ann-list li {
+  font-size: 11px;
+  color: var(--text3);
+  display: flex;
+  gap: 6px;
+  line-height: 1.5;
+}
+.ann-list li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+.hint-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--yellow-bg);
+  color: var(--yellow);
+  border: 1px solid var(--yellow-border);
+  margin-top: 8px;
+}
+
+/* ── SCREEN CONTENT ── */
+.screen { display: none; height: 100%; }
+.screen.active { display: block; }
+
+/* Common UI components */
+.s-header {
+  padding: 12px 20px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.s-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -.02em;
+  color: var(--text);
+}
+.s-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.back-btn {
+  font-size: 12px;
+  color: var(--text3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color .15s;
+}
+.back-btn:hover { color: var(--accent); }
+
+.px { padding-left: 20px; padding-right: 20px; }
+
+.stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 20px 12px; }
+.stat-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.stat-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 28px; line-height: 1; color: var(--text); }
+.stat-lbl { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.stat-box.warn .stat-num { color: var(--yellow); }
+.stat-box.danger .stat-num { color: var(--red); }
+.stat-box.ok .stat-num { color: var(--green); }
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 8px 20px 6px;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .15s;
+}
+.task-item:hover { background: var(--bg3); }
+.task-item:active { background: var(--bg4); }
+
+.t-check {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid var(--border2);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+}
+.t-check.done { background: var(--green); border-color: var(--green); }
+.t-check.done::after { content: '✓'; font-size: 10px; color: #000; font-weight: 700; }
+
+.t-body { flex: 1; }
+.t-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; margin-bottom: 3px; }
+.t-title.done-text { text-decoration: line-through; color: var(--text3); }
+.t-meta { font-size: 11px; color: var(--text3); display: flex; gap: 8px; flex-wrap: wrap; }
+
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid;
+}
+.b-new { color: var(--text3); border-color: var(--border2); background: var(--bg3); }
+.b-seen { color: var(--blue); border-color: var(--blue-border); background: var(--blue-bg); }
+.b-wait { color: var(--yellow); border-color: var(--yellow-border); background: var(--yellow-bg); }
+.b-done { color: var(--green); border-color: var(--green-border); background: var(--green-bg); }
+.b-pend { color: var(--red); border-color: var(--red-border); background: var(--red-bg); }
+.b-fyi { color: var(--yellow); border-color: var(--yellow-border); background: var(--yellow-bg); }
+
+.divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+.person-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.p-av {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500;
+  flex-shrink: 0;
+}
+.p-on { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.p-off { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); }
+.p-late { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+.p-sick { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+.p-info { flex: 1; }
+.p-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.p-status { font-size: 11px; color: var(--text3); }
+
+.big-btn {
+  margin: 12px 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  display: block;
+  width: calc(100% - 40px);
+}
+.big-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+.big-btn:active { transform: translateY(0); }
+.big-btn.secondary {
+  background: var(--bg3);
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.notif-preview {
+  margin: 8px 20px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.notif-preview:hover { border-color: var(--accent); }
+.notif-preview.warn { border-color: var(--yellow-border); background: var(--yellow-bg); }
+.notif-preview.success { border-color: var(--green-border); background: var(--green-bg); }
+.notif-preview.danger { border-color: var(--red-border); background: var(--red-bg); }
+.np-app { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3); margin-bottom: 3px; }
+.np-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.np-body { font-size: 11px; color: var(--text3); line-height: 1.4; margin-bottom: 6px; }
+.np-btns { display: flex; gap: 5px; }
+.np-btn {
+  font-size: 10px; padding: 3px 10px;
+  border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  background: var(--bg2);
+  transition: all .15s;
+}
+.np-btn:hover { border-color: var(--accent); color: var(--accent); }
+.np-btn.p { background: var(--accent); color: white; border-color: var(--accent); }
+.np-btn.p:hover { background: var(--accent2); }
+
+.voice-area {
+  margin: 8px 20px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+}
+.voice-area:hover { border-color: var(--accent); }
+.voice-area.recording { border-color: var(--green); background: var(--green-bg); }
+.mic-btn {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 8px;
+  font-size: 20px;
+  transition: all .2s;
+}
+.voice-area.recording .mic-btn { background: var(--green); }
+.mic-label { font-size: 11px; color: var(--text3); }
+
+.ai-box {
+  margin: 8px 20px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.ai-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; color: var(--blue);
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 4px;
+}
+.ai-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.ai-chip {
+  font-size: 11px; font-weight: 500;
+  padding: 3px 10px; border-radius: 99px;
+}
+.ac-who { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.ac-when { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+.ac-remind { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.ai-confirm { display: flex; gap: 6px; }
+.ai-ok {
+  flex: 1; background: var(--text); color: var(--bg);
+  border: none; border-radius: 7px; padding: 7px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: all .15s;
+}
+.ai-ok:hover { background: var(--text2); }
+.ai-edit {
+  flex: 1; background: transparent; color: var(--text3);
+  border: 1px solid var(--border2); border-radius: 7px; padding: 7px;
+  font-size: 12px; cursor: pointer;
+  transition: all .15s;
+}
+.ai-edit:hover { border-color: var(--text3); color: var(--text2); }
+
+.detail-section { padding: 12px 20px; border-bottom: 1px solid var(--border); }
+.detail-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.detail-value { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+.status-tabs { display: flex; gap: 6px; padding: 0 20px 12px; flex-wrap: wrap; }
+.stab {
+  font-size: 11px; font-weight: 500;
+  padding: 5px 12px; border-radius: 99px;
+  border: 1px solid var(--border2);
+  color: var(--text3); cursor: pointer;
+  transition: all .15s;
+}
+.stab:hover { border-color: var(--text3); color: var(--text2); }
+.stab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+.update-entry {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.ue-time { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 3px; }
+.ue-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.ue-badge { display: inline-block; margin-bottom: 4px; }
+
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px 20px; }
+.quick-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.quick-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,107,43,.06); }
+
+.chat-bubble {
+  padding: 4px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bubble-out { align-items: flex-end; }
+.bubble-in { align-items: flex-start; }
+.bubble-name { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+.bubble {
+  display: inline-block;
+  max-width: 75%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.bubble-in .bubble { background: var(--bg3); color: var(--text); border-radius: 3px 12px 12px 12px; }
+.bubble-out .bubble { background: var(--accent); color: white; border-radius: 12px 3px 12px 12px; }
+.bubble-time { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+.fronta-item {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .15s;
+}
+.fronta-item:hover { background: var(--bg3); }
+.fi-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.fi-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.fi-meta { font-size: 11px; color: var(--text3); }
+.fi-btns { display: flex; gap: 5px; margin-top: 8px; }
+.fi-btn {
+  font-size: 10px; padding: 3px 10px;
+  border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--border2); color: var(--text3);
+  background: var(--bg3); transition: all .15s;
+}
+.fi-btn:hover { border-color: var(--text3); }
+.fi-btn.ok { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+.fi-btn.no { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+.fi-btn.p { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* Attendance bar */
+.att-bar { height: 3px; border-radius: 99px; margin-top: 6px; }
+.att-late { background: linear-gradient(90deg, var(--green) 60%, var(--yellow) 100%); }
+
+/* ── TOAST NOTIFICATION ── */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--text);
+  z-index: 1000;
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: var(--green-border); color: var(--green); }
+.toast.warn { border-color: var(--yellow-border); color: var(--yellow); }
+
+/* ── CEO specific ── */
+.location-card {
+  margin: 0 20px 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.location-card:hover { border-color: var(--border2); background: var(--bg4); }
+.lc-row { display: flex; justify-content: space-between; align-items: center; }
+.lc-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.lc-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.lc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.lc-ok { background: var(--green); }
+.lc-warn { background: var(--yellow); }
+.lc-danger { background: var(--red); }
+
+/* ── Profile screen ── */
+.profile-header { padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.profile-av {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700;
+  border: 2px solid;
+}
+.profile-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; }
+.profile-role { font-size: 12px; color: var(--text3); }
+
+.setting-row {
+  display: flex; justify-content: space-between;
+  align-items: center; padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background .15s;
+}
+.setting-row:hover { background: var(--bg3); }
+.sr-label { font-size: 13px; color: var(--text); }
+.sr-val { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+.toggle {
+  width: 32px; height: 18px; border-radius: 99px;
+  background: var(--green); position: relative;
+  flex-shrink: 0;
+}
+.toggle.off { background: var(--border2); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  transition: right .2s;
+}
+.toggle.off::after { right: auto; left: 2px; }
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="shell">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div>
+      <div class="app-logo">Help<span>App</span></div>
+      <div style="font-size:11px; color:var(--text3);">Interaktivní prototyp</div>
+    </div>
+
+    <div>
+      <div class="panel-label">Přepnout roli</div>
+      <div class="role-btn active" id="role-lukas" onclick="switchRole('lukas')">
+        <div class="role-av av-ceo">L</div>
+        <div class="role-info">
+          <div class="role-name">Lukáš</div>
+          <div class="role-tag">CEO</div>
+        </div>
+      </div>
+      <div class="role-btn" id="role-zdenek" onclick="switchRole('zdenek')">
+        <div class="role-av av-mgr">Z</div>
+        <div class="role-info">
+          <div class="role-name">Zdeněk</div>
+          <div class="role-tag">Manager</div>
+        </div>
+      </div>
+      <div class="role-btn" id="role-jakub" onclick="switchRole('jakub')">
+        <div class="role-av av-mkt">J</div>
+        <div class="role-info">
+          <div class="role-name">Jakub</div>
+          <div class="role-tag">Markeťák</div>
+        </div>
+      </div>
+      <div class="role-btn" id="role-nikola" onclick="switchRole('nikola')">
+        <div class="role-av av-emp">N</div>
+        <div class="role-info">
+          <div class="role-name">Nikola</div>
+          <div class="role-tag">Zaměstnanec</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-label">Obrazovky</div>
+      <div class="nav-tree" id="nav-tree"></div>
+    </div>
+  </div>
+
+  <!-- PHONE FRAME -->
+  <div class="phone-frame">
+    <div class="phone-notch"><div class="notch-bar"></div></div>
+    <div class="phone-status">
+      <span>9:41</span>
+      <span id="role-indicator">CEO</span>
+      <span>●●●</span>
+    </div>
+    <div class="phone-screen" id="phone-screen"></div>
+    <div class="phone-nav-bar" id="phone-nav"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel" id="right-panel"></div>
+
+</div>
+
+<script>
+// ── STATE ──
+let currentRole = 'lukas';
+let currentScreen = 'dashboard';
+
+// ── ROLE CONFIG ──
+const roles = {
+  lukas: {
+    name: 'Lukáš', tag: 'CEO', av: 'av-ceo',
+    nav: [
+      { id: 'dashboard', label: 'Přehled' },
+      { id: 'ukoly', label: 'Úkoly CEO' },
+      { id: 'zpravy', label: 'Zprávy' },
+      { id: 'profil', label: 'Já' },
+    ]
+  },
+  zdenek: {
+    name: 'Zdeněk', tag: 'Manager', av: 'av-mgr',
+    nav: [
+      { id: 'dashboard', label: 'Přehled' },
+      { id: 'ukoly', label: 'Úkoly' },
+      { id: 'tym', label: 'Tým' },
+      { id: 'chat', label: 'Chat' },
+      { id: 'nastaveni', label: 'Nastavení' },
+    ]
+  },
+  jakub: {
+    name: 'Jakub', tag: 'Markeťák', av: 'av-mkt',
+    nav: [
+      { id: 'dashboard', label: 'Dnes' },
+      { id: 'ukoly', label: 'Úkoly' },
+      { id: 'fyi', label: 'FYI' },
+      { id: 'profil', label: 'Já' },
+    ]
+  },
+  nikola: {
+    name: 'Nikola', tag: 'Zaměstnanec', av: 'av-emp',
+    nav: [
+      { id: 'dashboard', label: 'Dnes' },
+      { id: 'ukoly', label: 'Úkoly' },
+      { id: 'tym', label: 'Tým' },
+      { id: 'chat', label: 'Chat' },
+      { id: 'profil', label: 'Já' },
+    ]
+  }
+};
+
+// ── SCREENS ──
+const screens = {
+  lukas: {
+    dashboard: {
+      title: 'Přehled', nav: 'dashboard',
+      annotation: { title: 'CEO Dashboard', body: 'Lukáš vidí agregaci všech provozoven. Žádná operativa — jen čísla a co vyžaduje jeho rozhodnutí.', items: ['3 provozovny na jednom místě','Červený indikátor = vyžaduje pozornost','FYI od Jakuba v samostatné sekci'] },
+      render: () => `
+        <div class="s-header"><div><div class="s-title">Dobrý ráno, Lukáš</div><div class="s-sub">Přehled provozoven · ${new Date().toLocaleDateString('cs-CZ')}</div></div></div>
+        <div class="stat-row">
+          <div class="stat-box ok"><div class="stat-num">3</div><div class="stat-lbl">Provozovny</div></div>
+          <div class="stat-box danger"><div class="stat-num">2</div><div class="stat-lbl">Vyžaduje pozornost</div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-num">82%</div><div class="stat-lbl">Plnění úkolů</div></div>
+          <div class="stat-box warn"><div class="stat-num">1</div><div class="stat-lbl">Čeká na tebe</div></div>
+        </div>
+        <div class="section-label">Provozovny</div>
+        <div class="location-card" onclick="goScreen('lukas','provozovna')">
+          <div class="lc-row"><div class="lc-name">Bistro Green</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--green)">OK</span><div class="lc-dot lc-ok"></div></div></div>
+          <div class="lc-meta">3 na směně · 2 otevřené úkoly</div>
+        </div>
+        <div class="location-card" onclick="showToast('Kavárna Anděl — detail','warn')">
+          <div class="lc-row"><div class="lc-name">Kavárna Anděl</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--yellow)">!</span><div class="lc-dot lc-warn"></div></div></div>
+          <div class="lc-meta">2 na směně · 1 úkol po termínu</div>
+        </div>
+        <div class="location-card" onclick="showToast('Bistro Náměstí — vše OK')">
+          <div class="lc-row"><div class="lc-name">Bistro Náměstí</div><div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;color:var(--green)">OK</span><div class="lc-dot lc-ok"></div></div></div>
+          <div class="lc-meta">4 na směně · vše v pořádku</div>
+        </div>
+        <div class="section-label">Marketing — od Jakuba</div>
+        <div class="fronta-item" onclick="goScreen('lukas','ukoly')">
+          <div class="fi-row"><div><div class="fi-title">Firemní trička objednána</div><div class="fi-meta">Jakub · dnes 11:31 · pouze info</div></div><span class="badge b-fyi">FYI</span></div>
+        </div>
+        <div class="fronta-item" onclick="showToast('Návrh banneru — otevírám')">
+          <div class="fi-row"><div><div class="fi-title">Návrh banneru ke schválení</div><div class="fi-meta">Jakub · včera · odkaz přiložen</div></div><span class="badge b-pend">Ke schválení</span></div>
+          <div class="fi-btns"><div class="fi-btn ok" onclick="event.stopPropagation();showToast('Banner schválen ✓','success')">Schválit</div><div class="fi-btn no" onclick="event.stopPropagation();showToast('Banner zamítnut')">Zamítnout</div></div>
+        </div>
+      `
+    },
+    provozovna: {
+      title: 'Bistro Green', nav: 'dashboard',
+      annotation: { title: 'Detail provozovny', body: 'CEO vidí KPIs jedné provozovny a může psát manažerovi. Nevidí docházku zaměstnanců ani jejich detailní úkoly.', items: ['Kontakt přímo na Zdeňka','Eskalované úkoly viditelné','Bez HR detailů'] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('lukas','dashboard')">← Zpět</div></div>
+        <div class="s-header"><div class="s-title">Bistro Green</div></div>
+        <div class="stat-row">
+          <div class="stat-box ok"><div class="stat-num">3</div><div class="stat-lbl">Na směně</div></div>
+          <div class="stat-box"><div class="stat-num">2</div><div class="stat-lbl">Otevřené úkoly</div></div>
+        </div>
+        <div class="section-label">Manager</div>
+        <div class="person-row">
+          <div class="p-av p-on">Z</div>
+          <div class="p-info"><div class="p-name">Zdeněk Novák</div><div class="p-status">Manager · online</div></div>
+          <span class="badge b-done">Aktivní</span>
+        </div>
+        <div class="section-label">Vyžaduje pozornost</div>
+        <div class="fronta-item" onclick="showToast('Zdeněk — otevírám zprávu')">
+          <div class="fi-row"><div><div class="fi-title">Samolepky po termínu</div><div class="fi-meta">Zdeněk čeká na Jakuba · 2 dny</div></div><span class="badge b-pend">!</span></div>
+        </div>
+        <button class="big-btn" onclick="goScreen('lukas','zpravy')">Napsat Zdeňkovi</button>
+      `
+    },
+    ukoly: {
+      title: 'Úkoly', nav: 'ukoly',
+      annotation: { title: 'CEO — úkoly', body: 'Lukáš zadává úkoly pouze manažerům. Nevidí úkoly zaměstnanců — jen agregaci.', items: ['Zadávání hlasem nebo textem','Přiřazení: jen Zdeněk nebo jiný manažer','FYI od Jakuba v samostatné sekci'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Úkoly</div></div>
+        <div class="section-label">Aktivní</div>
+        <div class="task-item" onclick="showToast('Detail úkolu — Zdeněk')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Příprava letního menu — review</div><div class="t-meta"><span>→ Zdeněk</span><span>do 25. 5.</span></div></div>
+          <span class="badge b-seen">Přijato</span>
+        </div>
+        <div class="task-item" onclick="showToast('Detail úkolu — Kavárna Anděl')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Zkontrolovat inventory Anděl</div><div class="t-meta"><span>→ Martin</span><span>po termínu</span></div></div>
+          <span class="badge b-pend">Po termínu</span>
+        </div>
+        <div class="section-label">FYI od Jakuba</div>
+        <div class="task-item" onclick="showToast('FYI — trička objednána')">
+          <div class="t-check done"></div>
+          <div class="t-body"><div class="t-title done-text">Firemní trička objednána</div><div class="t-meta"><span>Jakub · dnes</span></div></div>
+          <span class="badge b-fyi">FYI</span>
+        </div>
+        <button class="big-btn" onclick="goScreen('lukas','novy-ukol')">+ Nový úkol</button>
+      `
+    },
+    'novy-ukol': {
+      title: 'Nový úkol', nav: 'ukoly',
+      annotation: { title: 'Zadání úkolu — CEO', body: 'Lukáš zadává hlasem nebo textem. AI navrhne příjemce z manažerů, termín a připomenutí.', items: ['Příjemce: pouze manažeři','AI parsuje datum a jméno z hlasu','Jeden tap Potvrdit'] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('lukas','ukoly')">← Úkoly</div><div class="s-title">Nový úkol</div></div>
+        <div class="voice-area" id="voice-ceo" onclick="toggleRecording('voice-ceo','ai-ceo')">
+          <div class="mic-btn">🎙</div>
+          <div class="mic-label">Podržte a mluvte nebo klikněte</div>
+        </div>
+        <div class="px" style="margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Nebo napište</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;color:var(--text3);">Zdeňku, zkontroluj zásoby před víkendem...</div>
+        </div>
+        <div id="ai-ceo" style="display:none">
+          <div class="ai-box">
+            <div class="ai-lbl">✦ AI navrhuje</div>
+            <div class="ai-chips">
+              <div class="ai-chip ac-who">→ Zdeněk</div>
+              <div class="ai-chip ac-when">do pátku</div>
+              <div class="ai-chip ac-remind">připomenout ve čt</div>
+            </div>
+            <div class="ai-confirm">
+              <button class="ai-ok" onclick="showToast('Úkol uložen ✓','success');goScreen('lukas','ukoly')">Potvrdit</button>
+              <button class="ai-edit">Upravit</button>
+            </div>
+          </div>
+        </div>
+      `
+    },
+    zpravy: {
+      title: 'Zprávy', nav: 'zpravy',
+      annotation: { title: 'CEO — zprávy', body: 'Lukáš komunikuje pouze s manažery. Zaměstnanci jeho zprávy nevidí.', items: ['Žádný skupinový chat s týmem','Přímá linka na Zdeňka','Rychlé FYI od Jakuba'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Zprávy</div></div>
+        <div class="person-row" onclick="goScreen('lukas','chat-zdenek')">
+          <div class="p-av p-on">Z</div>
+          <div class="p-info"><div class="p-name">Zdeněk Novák</div><div class="p-status">Manager · Bistro Green</div></div>
+          <span style="font-size:10px;color:var(--text3)">14:22</span>
+        </div>
+        <div class="person-row" onclick="showToast('Chat — Martin, Kavárna Anděl')">
+          <div class="p-av p-off">M</div>
+          <div class="p-info"><div class="p-name">Martin Kovář</div><div class="p-status">Manager · Kavárna Anděl</div></div>
+          <span style="font-size:10px;color:var(--text3)">včera</span>
+        </div>
+      `
+    },
+    'chat-zdenek': {
+      title: 'Zdeněk', nav: 'zpravy',
+      annotation: { title: 'Chat CEO ↔ Manager', body: 'Přímá komunikace bez zaměstnanců. Lukáš vidí kontext provozovny.', items: [] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('lukas','zpravy')">← Zprávy</div><div class="s-title">Zdeněk</div></div>
+        <div style="padding:12px 0;">
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Zdeněk</div><div class="bubble">Lukáši, potřebuju schválení pro nového dodavatele kávy. Pošlu návrh smlouvy.</div><div class="bubble-time">14:18</div></div>
+          <div class="chat-bubble bubble-out"><div class="bubble">Pošli mi to, podívám se dnes večer.</div><div class="bubble-time">14:22</div></div>
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Zdeněk</div><div class="bubble">Super, díky! Taky — samolepky přivezl Jakub, vše OK.</div><div class="bubble-time">14:23</div></div>
+        </div>
+        <button class="big-btn secondary" onclick="showToast('Zpráva odeslána ✓','success')">Napsat odpověď...</button>
+      `
+    },
+    profil: {
+      title: 'Já', nav: 'profil',
+      annotation: { title: 'Profil CEO', body: 'Nastavení notifikací a přístupu. CEO dostává pouze týdenní digest, ne denní.', items: [] },
+      render: () => renderProfile('Lukáš', 'CEO', 'av-ceo', 'Týdenní digest', 'Pondělí 8:00')
+    }
+  },
+
+  zdenek: {
+    dashboard: {
+      title: 'Přehled', nav: 'dashboard',
+      annotation: { title: 'Manager Dashboard', body: 'Zdeněk vidí provozovnu v číslech + frontu akcí. Vše co čeká na jeho rozhodnutí na jednom místě.', items: ['Fronta: schválení, eskalace, žádosti','Schválit volno přímo z dashboardu','Ranní AI digest v 7:00'] },
+      render: () => `
+        <div class="s-header"><div><div class="s-title">Bistro Green</div><div class="s-sub">Dnes · ${new Date().toLocaleDateString('cs-CZ')}</div></div></div>
+        <div class="stat-row">
+          <div class="stat-box ok"><div class="stat-num">3</div><div class="stat-lbl">Na směně</div></div>
+          <div class="stat-box warn"><div class="stat-num">2</div><div class="stat-lbl">Čeká schválení</div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box danger"><div class="stat-num">1</div><div class="stat-lbl">Po termínu</div></div>
+          <div class="stat-box"><div class="stat-num">5</div><div class="stat-lbl">Otevřené úkoly</div></div>
+        </div>
+        <div class="section-label">Vyžaduje pozornost</div>
+        <div class="fronta-item" onclick="goScreen('zdenek','detail-ukol')">
+          <div class="fi-row"><div><div class="fi-title">Zásoby piva — po termínu</div><div class="fi-meta">Nikola · mělo být dnes 14:00</div></div><span class="badge b-pend">!</span></div>
+          <div class="fi-btns"><div class="fi-btn p" onclick="event.stopPropagation();goScreen('zdenek','detail-ukol')">Detail</div><div class="fi-btn" onclick="event.stopPropagation();showToast('Úkol přeřazen','warn')">Přeřadit</div></div>
+        </div>
+        <div class="fronta-item" onclick="showToast('Žádost o volno — Lucie')">
+          <div class="fi-row"><div><div class="fi-title">Lucie žádá o volno</div><div class="fi-meta">Pá 16.5 – Ne 18.5 · dovolená</div></div><span class="badge b-wait">Čeká</span></div>
+          <div class="fi-btns"><div class="fi-btn ok" onclick="event.stopPropagation();showToast('Volno schváleno ✓','success')">Schválit</div><div class="fi-btn no" onclick="event.stopPropagation();showToast('Volno zamítnuto')">Zamítnout</div></div>
+        </div>
+        <div class="section-label">Kdo je teď tady</div>
+        <div class="person-row"><div class="p-av p-on">N</div><div class="p-info"><div class="p-name">Nikola</div><div class="p-status">od 9:00</div></div><span class="badge b-done">Na směně</span></div>
+        <div class="person-row"><div class="p-av p-late">K</div><div class="p-info"><div class="p-name">Klára</div><div class="p-status">od 10:18 · +18 min</div></div><span class="badge b-wait">Pozdní</span></div>
+        <div class="person-row"><div class="p-av p-off">M</div><div class="p-info"><div class="p-name">Martin</div><div class="p-status">dovolená</div></div><span class="badge b-new">Volno</span></div>
+      `
+    },
+    ukoly: {
+      title: 'Úkoly', nav: 'ukoly',
+      annotation: { title: 'Úkoly — Manager', body: 'Zdeněk vidí všechny úkoly provozovny. Může filtrovat dle osoby nebo stavu.', items: ['Zadání hlasem — AI navrhne příjemce','Filtrování dle osoby','Stav přijetí jako badge'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Úkoly</div></div>
+        <div style="display:flex;gap:6px;padding:4px 20px 10px;overflow-x:auto;">
+          <div class="stab active">Všechny</div>
+          <div class="stab" onclick="showToast('Filtr: Nikola')">Nikola</div>
+          <div class="stab" onclick="showToast('Filtr: Klára')">Klára</div>
+          <div class="stab" onclick="showToast('Filtr: Jakub')">Jakub</div>
+        </div>
+        <div class="task-item" onclick="goScreen('zdenek','detail-ukol')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Samolepky — BBQ, tatarku</div><div class="t-meta"><span>→ Jakub</span><span>do příštího týdne</span></div></div>
+          <span class="badge b-seen">Přijato</span>
+        </div>
+        <div class="task-item" onclick="goScreen('zdenek','detail-ukol')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Zásoby točeného piva</div><div class="t-meta"><span>→ Nikola</span><span>po termínu</span></div></div>
+          <span class="badge b-pend">Po termínu</span>
+        </div>
+        <div class="task-item" onclick="showToast('Detail — letní menu')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Letní menu — návrh</div><div class="t-meta"><span>→ Klára</span><span>za 3 dny</span></div></div>
+          <span class="badge b-wait">Čekám</span>
+        </div>
+        <div class="task-item">
+          <div class="t-check done"></div>
+          <div class="t-body"><div class="t-title done-text">Zkontrolovat terasu</div><div class="t-meta"><span>Nikola · splněno dnes</span></div></div>
+          <span class="badge b-done">Hotovo</span>
+        </div>
+        <button class="big-btn" onclick="goScreen('zdenek','novy-ukol')">+ Nový úkol</button>
+      `
+    },
+    'novy-ukol': {
+      title: 'Nový úkol', nav: 'ukoly',
+      annotation: { title: 'Zadání úkolu hlasem', body: 'Klikni na mikrofon — AI přepíše a navrhne příjemce, termín a připomenutí. Jeden tap Potvrdit.', items: ['Hlas → AI → návrh','Zdeněk může přiřadit komukoli v týmu','Rozšířené nastavení: foto, eskalace, opakování'] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('zdenek','ukoly')">← Úkoly</div><div class="s-title">Nový úkol</div></div>
+        <div class="voice-area" id="voice-z" onclick="toggleRecording('voice-z','ai-z')">
+          <div class="mic-btn">🎙</div>
+          <div class="mic-label">Klikni a mluv — AI zpracuje</div>
+        </div>
+        <div class="px" style="margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Přepis</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);font-style:italic;">"Kubi, potřebujeme nové samolepky na produkty — BBQ, tatarku, ideálně do příštího týdne."</div>
+        </div>
+        <div id="ai-z">
+          <div class="ai-box">
+            <div class="ai-lbl">✦ AI navrhuje</div>
+            <div class="ai-chips">
+              <div class="ai-chip ac-who">→ Jakub (Mkt)</div>
+              <div class="ai-chip ac-when">do příštího týdne</div>
+              <div class="ai-chip ac-remind">připomenout za 5 dní</div>
+            </div>
+            <div class="ai-confirm">
+              <button class="ai-ok" onclick="showToast('Úkol uložen — Jakub dostane push ✓','success');goScreen('zdenek','ukoly')">Potvrdit</button>
+              <button class="ai-edit" onclick="showToast('Editační mód')">Upravit</button>
+            </div>
+          </div>
+        </div>
+        <div class="section-label">Rozšířené nastavení</div>
+        <div class="setting-row"><div class="sr-label">Foto jako důkaz</div><div class="sr-val"><div class="toggle off"></div></div></div>
+        <div class="setting-row"><div class="sr-label">Eskalace při nesplnění</div><div class="sr-val"><div class="toggle"></div></div></div>
+        <div class="setting-row"><div class="sr-label">Opakující se úkol</div><div class="sr-val"><div class="toggle off"></div></div></div>
+      `
+    },
+    'detail-ukol': {
+      title: 'Detail úkolu', nav: 'ukoly',
+      annotation: { title: 'Detail úkolu — Manager', body: 'Zdeněk vidí aktuální stav, poslední komentář a může přímo reagovat.', items: ['Poslední update od Jakuba','Přeřadit nebo prodloužit termín','Historie skrytá — rozkliknout'] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('zdenek','ukoly')">← Úkoly</div></div>
+        <div class="px" style="padding-top:4px;padding-bottom:12px;">
+          <div style="font-size:18px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:8px;">Samolepky — BBQ, tatarku</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="badge b-seen">Přijato — Jakub</span>
+            <span class="badge b-wait">Čekám na tisk</span>
+          </div>
+        </div>
+        <div class="detail-section"><div class="detail-label">Přiřazeno</div><div class="detail-value">Jakub (Markeťák)</div></div>
+        <div class="detail-section"><div class="detail-label">Termín</div><div class="detail-value">do příštího týdne</div></div>
+        <div class="detail-section"><div class="detail-label">Poslední update</div><div class="detail-value" style="color:var(--text2);">"Poslal jsem to do tisku, snad to bude příští týden, přivezu to do bistra." <span style="color:var(--text3);font-size:11px;">— Jakub · dnes 14:33</span></div></div>
+        <div class="detail-section"><div class="detail-label">Připomenutí</div><div class="detail-value">za 5 dní (automatické)</div></div>
+        <div style="padding:8px 20px;display:flex;gap:6px;">
+          <button style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);cursor:pointer;" onclick="showToast('Přeřazuji úkol')">Přeřadit</button>
+          <button style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);cursor:pointer;" onclick="showToast('Termín prodloužen','warn')">Prodloužit</button>
+        </div>
+        <div class="section-label" style="cursor:pointer;" onclick="showToast('Historie updatů — rozbaleno')">Historie ↓ (zobrazit)</div>
+      `
+    },
+    tym: {
+      title: 'Tým', nav: 'tym',
+      annotation: { title: 'Tým — Manager', body: 'Live docházka s přesnými časy. Pozdní příchody označeny. Rychlý přístup ke schválení volna.', items: ['Pozdní příchod s minutami','Schválit výměnu směny','Export docházky pro mzdy'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Tým dnes</div></div>
+        <div class="section-label">Na směně</div>
+        <div class="person-row"><div class="p-av p-on">N</div><div class="p-info"><div class="p-name">Nikola</div><div class="p-status">od 9:00 · 5h 12min</div></div><span class="badge b-done">Zde</span></div>
+        <div class="person-row"><div class="p-av p-on">A</div><div class="p-info"><div class="p-name">Andy</div><div class="p-status">od 9:05</div></div><span class="badge b-done">Zde</span></div>
+        <div class="person-row"><div class="p-av p-late">K</div><div class="p-info"><div class="p-name">Klára</div><div class="p-status">od 10:18 · +18 min</div><div class="att-bar att-late" style="width:80px;"></div></div><span class="badge b-wait">+18 min</span></div>
+        <div class="section-label">Nepřítomní</div>
+        <div class="person-row"><div class="p-av p-off">M</div><div class="p-info"><div class="p-name">Martin</div><div class="p-status">dovolená do 18. 5.</div></div><span class="badge b-new">Volno</span></div>
+        <div class="person-row"><div class="p-av p-sick">L</div><div class="p-info"><div class="p-name">Lucie</div><div class="p-status">nemoc</div></div><span class="badge b-pend">Nemoc</span></div>
+        <div class="section-label">Čeká na schválení</div>
+        <div class="fronta-item" onclick="showToast('Výměna směny — Nikola ↔ Jana')">
+          <div class="fi-row"><div><div class="fi-title">Výměna směny — So 17. 5.</div><div class="fi-meta">Nikola nabízí · Jana zájem</div></div></div>
+          <div class="fi-btns"><div class="fi-btn ok" onclick="event.stopPropagation();showToast('Výměna schválena ✓','success')">Schválit</div><div class="fi-btn no">Zamítnout</div></div>
+        </div>
+        <button class="big-btn secondary" onclick="showToast('Export docházky — CSV')">Exportovat docházku (CSV)</button>
+      `
+    },
+    chat: {
+      title: 'Chat', nav: 'chat',
+      annotation: { title: 'Chat — Manager', body: 'Skupinový chat celé provozovny + přímé zprávy. Manager vidí i rychlé akce od zaměstnanců.', items: ['Skupinový chat — všichni','1:1 s konkrétním zaměstnancem','Rychlé akce jako bubliny'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Bistro Green</div></div>
+        <div style="padding-top:8px;">
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Nikola</div><div class="bubble">Jsem na místě 👋</div><div class="bubble-time">9:02</div></div>
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Andy</div><div class="bubble">Taky tady, terasa otevřená</div><div class="bubble-time">9:08</div></div>
+          <div class="chat-bubble bubble-out"><div class="bubble">Díky, dnes máme víc lidí — počítejte s plným provozem</div><div class="bubble-time">9:15</div></div>
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Nikola</div><div class="bubble">Potřebuji pomoc na baru 🆘</div><div class="bubble-time">12:33</div></div>
+          <div class="chat-bubble bubble-out"><div class="bubble">Jdu pomoct 👍</div><div class="bubble-time">12:34</div></div>
+        </div>
+        <div class="section-label">Rychlé akce</div>
+        <div class="quick-grid">
+          <div class="quick-btn" onclick="showToast('Odesláno: Jdu pomoct ✓','success')">Jdu pomoct</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Zpozdím se','warn')">Zpozdím se</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Jsem tu ✓','success')">Jsem tu</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Odcházím')">Odcházím</div>
+        </div>
+        <button class="big-btn secondary" onclick="showToast('Psaní zprávy...')">Napsat zprávu...</button>
+      `
+    },
+    nastaveni: {
+      title: 'Nastavení', nav: 'nastaveni',
+      annotation: { title: 'Nastavení — Manager', body: 'Správa týmu, rychlých akcí a notifikací. Bez nastavení firmy — to má Admin.', items: ['Přidat zaměstnance pozvánkou','Konfigurovat rychlé akce','Nastavit tichý čas'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Nastavení</div></div>
+        <div class="section-label">Tým</div>
+        <div class="setting-row" onclick="showToast('Pozvat zaměstnance — odkaz zkopírován ✓','success')"><div class="sr-label">Přidat zaměstnance</div><div class="sr-val">Pozvánkový odkaz →</div></div>
+        <div class="setting-row" onclick="showToast('Správa zaměstnanců')"><div class="sr-label">Správa zaměstnanců</div><div class="sr-val">5 aktivních →</div></div>
+        <div class="section-label">Rychlé akce</div>
+        <div class="setting-row" onclick="showToast('Správa rychlých akcí')"><div class="sr-label">Konfigurovat akce</div><div class="sr-val">4 akce →</div></div>
+        <div class="section-label">Notifikace</div>
+        <div class="setting-row"><div class="sr-label">Push notifikace</div><div class="sr-val"><div class="toggle"></div></div></div>
+        <div class="setting-row"><div class="sr-label">Ranní digest</div><div class="sr-val">7:00 ·<div class="toggle"></div></div></div>
+        <div class="setting-row"><div class="sr-label">Tichý čas</div><div class="sr-val">22:00–7:00 →</div></div>
+        <div class="setting-row"><div class="sr-label">Eskalace po</div><div class="sr-val">8 hodinách →</div></div>
+      `
+    }
+  },
+
+  jakub: {
+    dashboard: {
+      title: 'Dnes', nav: 'dashboard',
+      annotation: { title: 'Markeťák Dashboard', body: 'Jakub vidí pouze svoje úkoly. Žádná operativa, žádné směny. Přímo z dashboardu může poslat FYI.', items: ['Moje úkoly na dnes','FYI tlačítko u každého splněného','Bez docházky a směn'] },
+      render: () => `
+        <div class="s-header"><div><div class="s-title">Dobrý den, Jakub</div><div class="s-sub">Marketing · ${new Date().toLocaleDateString('cs-CZ')}</div></div></div>
+        <div class="section-label">Moje úkoly dnes</div>
+        <div class="task-item" onclick="goScreen('jakub','detail-jakub')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Samolepky — BBQ, tatarku</div><div class="t-meta"><span>od Zdeňka</span><span>do příštího týdne</span></div></div>
+          <span class="badge b-seen">Přijato</span>
+        </div>
+        <div class="task-item" onclick="showToast('Detail — firemní trička')">
+          <div class="t-check done"></div>
+          <div class="t-body"><div class="t-title done-text">Firemní trička objednána</div><div class="t-meta"><span>splněno dnes · FYI odesláno Lukášovi</span></div></div>
+          <span class="badge b-fyi">FYI ✓</span>
+        </div>
+        <div class="task-item" onclick="showToast('Detail — banner')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Návrh letního banneru</div><div class="t-meta"><span>vlastní úkol</span><span>do pátku</span></div></div>
+          <span class="badge b-new">Otevřený</span>
+        </div>
+        <button class="big-btn" onclick="goScreen('jakub','ukoly')">+ Přidat úkol</button>
+      `
+    },
+    ukoly: {
+      title: 'Úkoly', nav: 'ukoly',
+      annotation: { title: 'Úkoly — Markeťák', body: 'Jakub spravuje vlastní frontu. Může zadávat úkoly jen Lukášovi nebo Zdeňkovi.', items: ['Zadávání hlasem nebo textem','Příjemce: CEO nebo Manager','Vlastní úkoly bez přiřazení'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Moje úkoly</div></div>
+        <div style="display:flex;gap:6px;padding:4px 20px 10px;">
+          <div class="stab active">Otevřené</div>
+          <div class="stab" onclick="showToast('Filtr: Hotové')">Hotové</div>
+        </div>
+        <div class="task-item" onclick="goScreen('jakub','detail-jakub')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Samolepky — od Zdeňka</div><div class="t-meta"><span>do příštího týdne</span></div></div>
+          <span class="badge b-wait">V tisku</span>
+        </div>
+        <div class="task-item" onclick="showToast('Detail — banner')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Návrh letního banneru</div><div class="t-meta"><span>vlastní · do pátku</span></div></div>
+          <span class="badge b-new">Otevřený</span>
+        </div>
+        <div class="task-item" onclick="showToast('Detail — sociální sítě')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Plán postů na červen</div><div class="t-meta"><span>zadal jsem Lukášovi ke schválení</span></div></div>
+          <span class="badge b-seen">Čeká Lukáš</span>
+        </div>
+        <button class="big-btn" onclick="goScreen('jakub','novy-ukol-jakub')">+ Nový úkol</button>
+      `
+    },
+    'novy-ukol-jakub': {
+      title: 'Nový úkol', nav: 'ukoly',
+      annotation: { title: 'Zadání úkolu — Markeťák', body: 'Jakub může zadat úkol sobě nebo Zdeňkovi/Lukášovi. Systém omezí příjemce dle role.', items: ['Sobě: vlastní to-do','Zdeněk nebo Lukáš: s notifikací','AI parsuje z hlasu'] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('jakub','ukoly')">← Úkoly</div><div class="s-title">Nový úkol</div></div>
+        <div class="voice-area" id="voice-j" onclick="toggleRecording('voice-j','ai-j')">
+          <div class="mic-btn">🎙</div>
+          <div class="mic-label">Klikni a mluv</div>
+        </div>
+        <div class="section-label">Přiřadit komu</div>
+        <div style="padding:0 20px 12px;display:flex;gap:6px;flex-wrap:wrap;">
+          <div class="stab active">Sobě</div>
+          <div class="stab" onclick="showToast('Přiřadit Zdeňkovi')">Zdeněk</div>
+          <div class="stab" onclick="showToast('Přiřadit Lukášovi')">Lukáš</div>
+        </div>
+        <div id="ai-j" style="display:none;">
+          <div class="ai-box">
+            <div class="ai-lbl">✦ AI navrhuje</div>
+            <div class="ai-chips">
+              <div class="ai-chip ac-who">Sobě</div>
+              <div class="ai-chip ac-when">do pátku</div>
+              <div class="ai-chip ac-remind">připomenout zítra</div>
+            </div>
+            <div class="ai-confirm">
+              <button class="ai-ok" onclick="showToast('Úkol uložen ✓','success');goScreen('jakub','ukoly')">Potvrdit</button>
+              <button class="ai-edit">Upravit</button>
+            </div>
+          </div>
+        </div>
+        <div class="section-label">Termín</div>
+        <div style="padding:0 20px;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+          <div class="stab">zítra</div>
+          <div class="stab active">za 3 dny</div>
+          <div class="stab">za týden</div>
+          <div class="stab">vlastní</div>
+        </div>
+      `
+    },
+    'detail-jakub': {
+      title: 'Samolepky', nav: 'ukoly',
+      annotation: { title: 'Detail úkolu — Markeťák', body: 'Jakub přidá hlasový update. AI navrhne stav a připomenutí. Zdeněk dostane push.', items: ['Hlasový update → AI návrh stavu','Stav: Čekám na dodání','Připomenutí oběma automaticky'] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('jakub','ukoly')">← Úkoly</div></div>
+        <div class="px" style="padding-top:4px;padding-bottom:10px;">
+          <div style="font-size:17px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:6px;">Samolepky — BBQ, tatarku</div>
+          <div style="display:flex;gap:5px;"><span class="badge b-seen">Přijato</span><span class="badge b-wait">V tisku</span></div>
+        </div>
+        <div class="detail-section"><div class="detail-label">Od</div><div class="detail-value">Zdeněk (Manager)</div></div>
+        <div class="detail-section"><div class="detail-label">Termín</div><div class="detail-value">do příštího týdne</div></div>
+        <div class="detail-section"><div class="detail-label">Poslední update</div><div class="detail-value" style="color:var(--text2);">"Poslal jsem to do tisku, snad to bude příští týden." <span style="color:var(--text3);font-size:11px;">· dnes 14:33</span></div></div>
+        <div class="section-label">Přidat update</div>
+        <div class="voice-area" id="voice-j2" onclick="toggleRecording('voice-j2','ai-j2')">
+          <div class="mic-btn">🎙</div>
+          <div class="mic-label">Nahrát hlasový update</div>
+        </div>
+        <div id="ai-j2" style="display:none;">
+          <div class="ai-box">
+            <div class="ai-lbl">✦ AI navrhuje</div>
+            <div class="ai-chips">
+              <div class="ai-chip ac-who" style="background:var(--yellow-bg);color:var(--yellow);border-color:var(--yellow-border);">Čekám na dodání</div>
+              <div class="ai-chip ac-remind">připomenout za 5 dní</div>
+            </div>
+            <div class="ai-confirm">
+              <button class="ai-ok" onclick="showToast('Update uložen — Zdeněk dostane push ✓','success')">Potvrdit + informovat Zdeňka</button>
+              <button class="ai-edit">Upravit</button>
+            </div>
+          </div>
+        </div>
+        <button class="big-btn secondary" style="margin-top:8px;" onclick="showToast('Úkol označen jako hotovo ✓','success');goScreen('jakub','fyi')">Označit hotovo + poslat FYI</button>
+      `
+    },
+    fyi: {
+      title: 'FYI', nav: 'fyi',
+      annotation: { title: 'FYI Updates', body: 'Jakub si sám vybírá co pošle Lukášovi nebo Zdeňkovi. Není to schválení — jen informace.', items: ['Výběr příjemce: CEO nebo Manager','Přiložit soubor / odkaz','Žádná akce se nevyžaduje od příjemce'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">FYI</div></div>
+        <div class="section-label">Odeslané</div>
+        <div class="fronta-item" onclick="showToast('FYI detail — trička')">
+          <div class="fi-row"><div><div class="fi-title">Firemní trička objednána</div><div class="fi-meta">→ Lukáš · dnes 11:31</div></div><span class="badge b-done">Doručeno</span></div>
+        </div>
+        <div class="fronta-item" onclick="showToast('FYI detail — banner')">
+          <div class="fi-row"><div><div class="fi-title">Návrh banneru ke schválení</div><div class="fi-meta">→ Lukáš · včera · odkaz</div></div><span class="badge b-wait">Čeká na reakci</span></div>
+        </div>
+        <button class="big-btn" onclick="goScreen('jakub','novy-fyi')">+ Nový FYI update</button>
+      `
+    },
+    'novy-fyi': {
+      title: 'Nový FYI', nav: 'fyi',
+      annotation: { title: 'Odeslat FYI', body: 'Krátký update. Jakub vybere příjemce, napíše nebo nahrá zprávu. Volitelně přiloží odkaz.', items: ['Příjemce: Lukáš nebo Zdeněk','Přiložit odkaz nebo soubor','Označeno jako "pouze info" — bez akce'] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('jakub','fyi')">← FYI</div><div class="s-title">Nový FYI</div></div>
+        <div class="section-label">Komu posíláš</div>
+        <div style="padding:0 20px 12px;display:flex;gap:6px;">
+          <div class="stab active">Lukáš (CEO)</div>
+          <div class="stab" onclick="showToast('Vybráno: Zdeněk')">Zdeněk (Mgr)</div>
+        </div>
+        <div class="section-label">Zpráva</div>
+        <div style="margin:0 20px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;color:var(--text2);min-height:80px;">Dneska jsem zadal objednávku firemních triček — 3x S, 4x M, 2x L. Dodání příští týden v úterý.</div>
+        <div class="section-label">Přiloha (volitelné)</div>
+        <div class="setting-row" onclick="showToast('Přidat odkaz / soubor')"><div class="sr-label">Přidat odkaz nebo soubor</div><div class="sr-val">+</div></div>
+        <button class="big-btn" onclick="showToast('FYI odesláno Lukášovi ✓','success');goScreen('jakub','fyi')">Odeslat FYI</button>
+      `
+    },
+    profil: {
+      title: 'Já', nav: 'profil',
+      annotation: { title: 'Profil — Markeťák', body: 'Nastavení notifikací pro vlastní úkoly.', items: [] },
+      render: () => renderProfile('Jakub', 'Markeťák', 'av-mkt', 'Push notifikace', 'Vlastní úkoly')
+    }
+  },
+
+  nikola: {
+    dashboard: {
+      title: 'Dnes', nav: 'dashboard',
+      annotation: { title: 'Zaměstnanec Dashboard', body: 'Nikola otevře appku při příchodu. Velké tlačítko Příchod je dominantní. Úkoly a rychlé akce hned níže.', items: ['Příchod/odchod — největší prvek','Moje úkoly na dnes','Rychlé akce bez psaní'] },
+      render: () => `
+        <div class="s-header"><div><div class="s-title">Dobrý den, Nikola</div><div class="s-sub">Bistro Green · ${new Date().toLocaleDateString('cs-CZ')}</div></div></div>
+        <button class="big-btn" onclick="showToast('Příchod zaznamenán — 9:02 ✓','success')">Příchod na směnu</button>
+        <div class="section-label">Moje úkoly dnes</div>
+        <div class="task-item" onclick="goScreen('nikola','detail-nikola')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Zásoby točeného piva</div><div class="t-meta"><span>od Zdeňka</span><span>do 14:00</span></div></div>
+          <span class="badge b-new">Nový</span>
+        </div>
+        <div class="task-item" onclick="showToast('Detail — terasa')">
+          <div class="t-check done"></div>
+          <div class="t-body"><div class="t-title done-text">Otevřít terasu</div><div class="t-meta"><span>splněno 9:12</span></div></div>
+          <span class="badge b-done">Hotovo</span>
+        </div>
+        <div class="section-label">Rychlé akce</div>
+        <div class="quick-grid">
+          <div class="quick-btn" onclick="showToast('Odesláno: Zpozdím se','warn')">Zpozdím se</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Potřebuji pomoc 🆘','warn')">Potřebuji pomoc</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Jsem na místě ✓','success')">Jsem na místě</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Odcházím')">Odcházím</div>
+        </div>
+      `
+    },
+    ukoly: {
+      title: 'Úkoly', nav: 'ukoly',
+      annotation: { title: 'Úkoly — Zaměstnanec', body: 'Nikola vidí pouze svoje úkoly. Může přidat update hlasem nebo textem.', items: ['Jen moje úkoly','Přijmout úkol tapem','Update hlasem → AI návrh stavu'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Moje úkoly</div></div>
+        <div style="display:flex;gap:6px;padding:4px 20px 10px;">
+          <div class="stab active">Otevřené</div>
+          <div class="stab" onclick="showToast('Filtr: Hotové')">Hotové</div>
+        </div>
+        <div class="task-item" onclick="goScreen('nikola','detail-nikola')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Zásoby točeného piva</div><div class="t-meta"><span>od Zdeňka</span><span>do 14:00 · dnes</span></div></div>
+          <span class="badge b-pend">Čeká na přijetí</span>
+        </div>
+        <div class="task-item" onclick="showToast('Detail — ubrousky')">
+          <div class="t-check"></div>
+          <div class="t-body"><div class="t-title">Objednat ubrousky</div><div class="t-meta"><span>od Zdeňka</span><span>za 2 dny</span></div></div>
+          <span class="badge b-new">Nový</span>
+        </div>
+        <div class="task-item">
+          <div class="t-check done"></div>
+          <div class="t-body"><div class="t-title done-text">Otevřít terasu</div><div class="t-meta"><span>splněno 9:12</span></div></div>
+          <span class="badge b-done">Hotovo</span>
+        </div>
+      `
+    },
+    'detail-nikola': {
+      title: 'Zásoby piva', nav: 'ukoly',
+      annotation: { title: 'Detail + přijetí', body: 'Nikola přijme úkol — Zdeněk okamžitě dostane push. Pak přidá update hlasem.', items: ['Tap Přijmout → push Zdeňkovi','Hlasový update → AI navrhne stav','Označit hotovo nebo Čekám'] },
+      render: () => `
+        <div class="s-header"><div class="back-btn" onclick="goScreen('nikola','ukoly')">← Úkoly</div></div>
+        <div class="px" style="padding-top:4px;padding-bottom:10px;">
+          <div style="font-size:17px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:6px;">Zásoby točeného piva</div>
+          <span class="badge b-pend">Čeká na přijetí</span>
+        </div>
+        <div class="detail-section"><div class="detail-label">Od</div><div class="detail-value">Zdeněk (Manager)</div></div>
+        <div class="detail-section"><div class="detail-label">Termín</div><div class="detail-value">dnes do 14:00</div></div>
+        <div class="detail-section"><div class="detail-label">Popis</div><div class="detail-value">Zkontrolovat zásoby točeného piva a objednat pokud méně než 2 várky.</div></div>
+        <button class="big-btn" onclick="showToast('Úkol přijat — Zdeněk dostane push ✓','success');document.querySelector('.big-btn').textContent='Přijato ✓'">Přijmout úkol</button>
+        <div class="section-label">Stav</div>
+        <div class="status-tabs">
+          <div class="stab active">Otevřený</div>
+          <div class="stab" onclick="showToast('Stav: Čekám na odpověď','warn')">Čekám na odpověď</div>
+          <div class="stab" onclick="showToast('Stav: Hotovo ✓','success')">Hotovo</div>
+        </div>
+        <div class="section-label">Přidat update</div>
+        <div class="voice-area" id="voice-n" onclick="toggleRecording('voice-n','ai-n')">
+          <div class="mic-btn">🎙</div>
+          <div class="mic-label">Nahrát hlasový update</div>
+        </div>
+        <div id="ai-n" style="display:none;">
+          <div class="ai-box">
+            <div class="ai-lbl">✦ AI navrhuje</div>
+            <div class="ai-chips">
+              <div class="ai-chip" style="background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border);">Čekám na odpověď</div>
+              <div class="ai-chip ac-remind">připomenout 20. 5.</div>
+            </div>
+            <div class="ai-confirm">
+              <button class="ai-ok" onclick="showToast('Update uložen — Zdeněk informován ✓','success')">Potvrdit</button>
+              <button class="ai-edit">Upravit</button>
+            </div>
+          </div>
+        </div>
+      `
+    },
+    tym: {
+      title: 'Tým', nav: 'tym',
+      annotation: { title: 'Tým — Zaměstnanec', body: 'Nikola vidí kdo je teď na směně. Může požádat o volno nebo nabídnout výměnu.', items: ['Kdo je na směně — live','Stav kolegů (volno, nemoc)','Žádost o volno nebo výměnu'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Tým dnes</div></div>
+        <div class="section-label">Na směně právě teď</div>
+        <div class="person-row"><div class="p-av p-on">Z</div><div class="p-info"><div class="p-name">Zdeněk</div><div class="p-status">od 8:00 · vedoucí</div></div><span class="badge b-done">Zde</span></div>
+        <div class="person-row"><div class="p-av p-on">N</div><div class="p-info"><div class="p-name">Nikola (já)</div><div class="p-status">od 9:00</div></div><span class="badge b-done">Zde</span></div>
+        <div class="person-row"><div class="p-av p-late">K</div><div class="p-info"><div class="p-name">Klára</div><div class="p-status">pozdní příchod</div></div><span class="badge b-wait">+18 min</span></div>
+        <div class="section-label">Nepřítomní</div>
+        <div class="person-row"><div class="p-av p-off">M</div><div class="p-info"><div class="p-name">Martin</div><div class="p-status">dovolená</div></div><span class="badge b-new">Volno</span></div>
+        <div class="person-row"><div class="p-av p-sick">L</div><div class="p-info"><div class="p-name">Lucie</div><div class="p-status">nemoc</div></div><span class="badge b-pend">Nemoc</span></div>
+        <div class="divider"></div>
+        <button class="big-btn" onclick="showToast('Žádost o volno — formulář')">Požádat o volno</button>
+        <button class="big-btn secondary" onclick="showToast('Výměna směny — nabídnout')">Nabídnout výměnu směny</button>
+      `
+    },
+    chat: {
+      title: 'Chat', nav: 'chat',
+      annotation: { title: 'Chat — Zaměstnanec', body: 'Skupinový chat + přímé zprávy. Rychlé akce jako bublinky — bez psaní.', items: ['Skupinový chat Bistro Green','Napsat kolegovi přímo','Rychlé akce: 1 tap bez psaní'] },
+      render: () => `
+        <div class="s-header"><div class="s-title">Bistro Green</div></div>
+        <div style="padding-top:8px;">
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Zdeněk</div><div class="bubble">Dnes máme plný provoz — všichni na pozicích od 10h</div><div class="bubble-time">8:45</div></div>
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Andy</div><div class="bubble">Jsem na místě 👋</div><div class="bubble-time">9:08</div></div>
+          <div class="chat-bubble bubble-out"><div class="bubble">Jsem tu, terasa hotová ✓</div><div class="bubble-time">9:12</div></div>
+        </div>
+        <div class="section-label">Rychlé akce</div>
+        <div class="quick-grid">
+          <div class="quick-btn" onclick="showToast('Odesláno: Zpozdím se','warn')">Zpozdím se</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Potřebuji pomoc 🆘','warn')">Potřebuji pomoc</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Jsem na místě ✓','success')">Jsem na místě</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Odcházím')">Odcházím</div>
+        </div>
+        <button class="big-btn secondary" onclick="showToast('Psaní zprávy...')">Napsat zprávu...</button>
+      `
+    },
+    profil: {
+      title: 'Já', nav: 'profil',
+      annotation: { title: 'Profil — Zaměstnanec', body: 'Základní nastavení. Notifikace a tichý čas.', items: [] },
+      render: () => renderProfile('Nikola', 'Zaměstnanec', 'av-emp', 'Push notifikace', 'Úkoly + příchod')
+    }
+  }
+};
+
+function renderProfile(name, tag, avClass, notifType, notifDetail) {
+  return `
+    <div class="profile-header">
+      <div class="profile-av ${avClass}" style="border-color:var(--border2);">${name[0]}</div>
+      <div class="profile-name">${name}</div>
+      <div class="profile-role">${tag} · Bistro Green</div>
+    </div>
+    <div class="section-label">Notifikace</div>
+    <div class="setting-row"><div class="sr-label">Push notifikace</div><div class="sr-val"><div class="toggle"></div></div></div>
+    <div class="setting-row"><div class="sr-label">${notifType}</div><div class="sr-val">${notifDetail} ·<div class="toggle"></div></div></div>
+    <div class="setting-row"><div class="sr-label">Tichý čas</div><div class="sr-val">22:00–7:00 →</div></div>
+    <div class="section-label">Účet</div>
+    <div class="setting-row" onclick="showToast('Profil — editace')"><div class="sr-label">Upravit profil</div><div class="sr-val">→</div></div>
+    <div class="setting-row" onclick="showToast('Odhlásit se?')"><div class="sr-label" style="color:var(--red)">Odhlásit se</div><div class="sr-val">→</div></div>
+  `;
+}
+
+// ── HELPERS ──
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+let recordingEl = null;
+let recordingTimer = null;
+function toggleRecording(voiceId, aiId) {
+  const va = document.getElementById(voiceId);
+  const ai = document.getElementById(aiId);
+  if (!va) return;
+  if (va.classList.contains('recording')) {
+    va.classList.remove('recording');
+    va.querySelector('.mic-label').textContent = 'Klikni a mluv';
+    clearTimeout(recordingTimer);
+    if (ai) { ai.style.display = 'block'; }
+    return;
+  }
+  va.classList.add('recording');
+  va.querySelector('.mic-label').textContent = 'Nahrávám... klikni pro stop';
+  recordingTimer = setTimeout(() => {
+    va.classList.remove('recording');
+    va.querySelector('.mic-label').textContent = 'Zpracovávám...';
+    setTimeout(() => {
+      va.querySelector('.mic-label').textContent = 'Klikni a mluv';
+      if (ai) { ai.style.display = 'block'; }
+    }, 800);
+  }, 3000);
+}
+
+function goScreen(role, screen) {
+  currentRole = role;
+  currentScreen = screen;
+  renderAll();
+}
+
+function switchRole(role) {
+  currentRole = role;
+  currentScreen = 'dashboard';
+  renderAll();
+}
+
+function renderAll() {
+  // Role buttons
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('role-' + currentRole)?.classList.add('active');
+
+  // Role indicator
+  document.getElementById('role-indicator').textContent = roles[currentRole].tag;
+
+  // Nav tree
+  const roleScreens = screens[currentRole];
+  const navTree = document.getElementById('nav-tree');
+  navTree.innerHTML = Object.entries(roleScreens).map(([id, s]) => `
+    <div class="nav-item ${id === currentScreen ? 'active' : ''}" onclick="goScreen('${currentRole}','${id}')">
+      <div class="nav-dot"></div>${s.title}
+    </div>
+  `).join('');
+
+  // Phone nav
+  const nav = roles[currentRole].nav;
+  const phoneNav = document.getElementById('phone-nav');
+  phoneNav.innerHTML = nav.map(item => {
+    const isActive = item.id === currentScreen ||
+      (item.id === 'ukoly' && currentScreen.includes('ukol')) ||
+      (item.id === 'ukoly' && currentScreen.includes('detail')) ||
+      (item.id === 'fyi' && currentScreen.includes('fyi')) ||
+      (item.id === 'zpravy' && currentScreen.includes('chat')) ||
+      (item.id === 'dashboard' && currentScreen === 'provozovna');
+    const icons = { dashboard:'⬜', ukoly:'✅', tym:'👥', chat:'💬', nastaveni:'⚙️', fyi:'📤', zpravy:'✉️', profil:'👤', přehled:'⬜' };
+    return `<div class="pnav-item ${isActive?'active':''}" onclick="goScreen('${currentRole}','${item.id}')">
+      <div class="pnav-icon">${icons[item.id]||'◻️'}</div>
+      <div class="pnav-label">${item.label}</div>
+    </div>`;
+  }).join('');
+
+  // Screen content
+  const screenDef = roleScreens[currentScreen] || roleScreens['dashboard'];
+  document.getElementById('phone-screen').innerHTML = screenDef.render();
+
+  // Right panel
+  const ann = screenDef.annotation;
+  const rightPanel = document.getElementById('right-panel');
+  rightPanel.innerHTML = `
+    <div class="annotation-card">
+      <div class="ann-title">${ann.title}</div>
+      <div class="ann-body">${ann.body}</div>
+      ${ann.items.length ? `<ul class="ann-list">${ann.items.map(i=>`<li>${i}</li>`).join('')}</ul>` : ''}
+    </div>
+    <div class="annotation-card">
+      <div class="ann-title">Navigace</div>
+      <div class="ann-body">Role: <strong>${roles[currentRole].name}</strong> (${roles[currentRole].tag})<br>Obrazovka: <strong>${screenDef.title}</strong></div>
+      <div class="hint-badge">Klikni na prvky v telefonu</div>
+    </div>
+    <div class="annotation-card">
+      <div class="ann-title">Klávesové zkratky</div>
+      <ul class="ann-list">
+        <li>Přepínej role v levém panelu</li>
+        <li>Klikej na položky v telefonu</li>
+        <li>Mikrofon: simuluje hlasové zadání</li>
+        <li>← Zpět naviguje zpět</li>
+      </ul>
+    </div>
+  `;
+}
+
+// Init
+renderAll();
+</script>
+</body>
+</html>
