@@ -178,7 +178,6 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0;
-  position: relative;
 }
 .phone-screen::-webkit-scrollbar { display: none; }
 
@@ -697,6 +696,18 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .fyi-send-btn { flex: 1; background: var(--accent); color: white; border: none; border-radius: 10px; padding: 12px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .2s; }
 .fyi-send-btn:hover { background: var(--accent2); }
 .fyi-cancel-btn { background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); border-radius: 10px; padding: 12px 16px; font-size: 13px; cursor: pointer; }
+
+/* ── CHAT INPUT BAR ── */
+.chat-input-bar {
+  display: none;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  gap: 8px;
+  align-items: center;
+}
+.chat-input-bar.show { display: flex; }
 </style>
 </head>
 <body>
@@ -759,6 +770,10 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
       <span>●●●</span>
     </div>
     <div class="phone-screen" id="phone-screen"></div>
+    <div class="chat-input-bar" id="chat-input-bar">
+      <div style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:9px 14px;font-size:12px;color:var(--text3);cursor:text;" onclick="showToast('Psaní zprávy...')">Napsat zprávu...</div>
+      <div style="width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="showToast('Zpráva odeslána ✓','success')"><i data-lucide="send" style="width:14px;height:14px;stroke:white;stroke-width:2;margin-left:2px;"></i></div>
+    </div>
     <div class="phone-nav-bar" id="phone-nav"></div>
 
     <!-- FYI OVERLAY + BOTTOM SHEET -->
@@ -1640,25 +1655,17 @@ const screens = {
       annotation: { title: 'Chat — Zaměstnanec', body: 'Skupinový chat + přímé zprávy. Rychlé akce jako bublinky — bez psaní.', items: ['Skupinový chat Bistro Green','Napsat kolegovi přímo','Rychlé akce: 1 tap bez psaní'] },
       render: () => `
         <div class="s-header"><div class="s-title">Bistro Green</div></div>
-        <div style="display:flex;flex-direction:column;height:calc(100% - 1px);">
-          <div style="flex:1;overflow-y:auto;">
-            <div style="padding-top:8px;">
-              <div class="chat-bubble bubble-in"><div class="bubble-name">Zdeněk</div><div class="bubble">Dnes máme plný provoz — všichni na pozicích od 10h</div><div class="bubble-time">8:45</div></div>
-              <div class="chat-bubble bubble-in"><div class="bubble-name">Andy</div><div class="bubble">Jsem na místě 👋</div><div class="bubble-time">9:08</div></div>
-              <div class="chat-bubble bubble-out"><div class="bubble">Jsem tu, terasa hotová ✓</div><div class="bubble-time">9:12</div></div>
-            </div>
-            <div class="section-label">Rychlé akce</div>
-            <div class="quick-grid">
-              <div class="quick-btn" onclick="showToast('Odesláno: Zpozdím se','warn')">Zpozdím se</div>
-              <div class="quick-btn" onclick="showToast('Odesláno: Potřebuji pomoc 🆘','warn')">Potřebuji pomoc</div>
-              <div class="quick-btn" onclick="showToast('Odesláno: Jsem na místě ✓','success')">Jsem na místě</div>
-              <div class="quick-btn" onclick="showToast('Odesláno: Odcházím')">Odcházím</div>
-            </div>
-          </div>
-          <div style="flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;align-items:center;">
-            <div style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:9px 14px;font-size:12px;color:var(--text3);cursor:text;" onclick="showToast('Psaní zprávy...')">Napsat zprávu...</div>
-            <div style="width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="showToast('Zpráva odeslána ✓','success')"><i data-lucide="send" style="width:14px;height:14px;stroke:white;stroke-width:2;margin-left:2px;"></i></div>
-          </div>
+        <div style="padding-top:8px;">
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Zdeněk</div><div class="bubble">Dnes máme plný provoz — všichni na pozicích od 10h</div><div class="bubble-time">8:45</div></div>
+          <div class="chat-bubble bubble-in"><div class="bubble-name">Andy</div><div class="bubble">Jsem na místě 👋</div><div class="bubble-time">9:08</div></div>
+          <div class="chat-bubble bubble-out"><div class="bubble">Jsem tu, terasa hotová ✓</div><div class="bubble-time">9:12</div></div>
+        </div>
+        <div class="section-label">Rychlé akce</div>
+        <div class="quick-grid">
+          <div class="quick-btn" onclick="showToast('Odesláno: Zpozdím se','warn')">Zpozdím se</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Potřebuji pomoc 🆘','warn')">Potřebuji pomoc</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Jsem na místě ✓','success')">Jsem na místě</div>
+          <div class="quick-btn" onclick="showToast('Odesláno: Odcházím')">Odcházím</div>
         </div>
       `
     },
@@ -1805,6 +1812,16 @@ function renderAll() {
       </ul>
     </div>
   `;
+  // Show/hide chat input bar
+  const chatScreens = ['chat-zdenek', 'chat'];
+  const bar = document.getElementById('chat-input-bar');
+  if (bar) {
+    if (chatScreens.includes(currentScreen)) {
+      bar.classList.add('show');
+    } else {
+      bar.classList.remove('show');
+    }
+  }
   // Re-render Lucide icons after DOM update
   if (window.lucide) lucide.createIcons();
 }
